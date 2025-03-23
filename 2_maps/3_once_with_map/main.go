@@ -27,21 +27,33 @@ func main() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
+			mu.Lock()
 			if _, ok := alreadyStored[doubles[i]]; !ok {
-				mu.Lock()
+
 				alreadyStored[doubles[i]] = struct{}{}
-				mu.Unlock()
 
 				uniqueIDs <- doubles[i]
+
 			}
+			mu.Unlock()
 		}()
 	}
 
+	go func() {
+		wg.Wait()
+		close(uniqueIDs)
+	}()
+
 	wg.Wait()
 	for val := range uniqueIDs {
-		fmt.Println(val)
-	}
 
-	fmt.Printf("len of ids: %d\n", len(uniqueIDs)) // 0, 1, 2, 3, 4 ...
+		mu.Lock()
+		fmt.Println(val)
+		mu.Unlock()
+
+	}
+	fmt.Printf("len of ids: %d\n", len(uniqueIDs))
+
+	// 0, 1, 2, 3, 4 ...
 	fmt.Println(uniqueIDs)
 }
