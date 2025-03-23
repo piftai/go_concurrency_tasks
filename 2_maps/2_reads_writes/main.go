@@ -12,7 +12,7 @@ func main() {
 	wg := sync.WaitGroup{}
 	reads := 1000
 	writes := 1000
-	mu := sync.Mutex{}
+	mu := sync.RWMutex{} // we need rw mutex to read lock
 
 	wg.Add(writes)
 	for i := 0; i < writes; i++ {
@@ -30,8 +30,10 @@ func main() {
 		i := i
 		go func() {
 			defer wg.Done()
+			mu.RLock() // here is a usage of rlock and runlock. its more effective than usual mutex
 
 			_, _ = storage[i]
+			mu.RUnlock()
 		}()
 	}
 
