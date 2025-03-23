@@ -2,17 +2,20 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"sync"
 )
 
 // print square of range 0...20 in random order
 func main() {
 	counter := 20
+	wg := sync.WaitGroup{}
 	for i := 0; i < counter; i++ {
-		go func() {
+		wg.Add(1)
+		go func(in int) {
+			defer wg.Done()
 			fmt.Println(i * i)
-		}()
+		}(i)
 	}
 
-	time.Sleep(time.Second)
+	wg.Wait()
 }
