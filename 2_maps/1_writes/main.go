@@ -7,8 +7,9 @@ import (
 
 // find and fix 2 bugs
 func main() {
-	var storage map[int]int
+	storage := make(map[int]int) // first bug is here. it's nil map
 
+	mu := sync.Mutex{} // second bug is here. we did not have mutex, but we need it
 	wg := sync.WaitGroup{}
 	writes := 1000
 
@@ -17,7 +18,9 @@ func main() {
 		i := i
 		go func() {
 			defer wg.Done()
+			mu.Lock()
 			storage[i] = i
+			mu.Unlock()
 		}()
 	}
 
